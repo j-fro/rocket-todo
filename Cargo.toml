@@ -1,0 +1,19 @@
+[package]
+name = "rocket-todo"
+version = "0.1.0"
+authors = ["jacobfroman <jacob.h.froman@gmail.com>"]
+
+[dependencies]
+rocket = "0.1.1"
+rocket_codegen = "0.1.1"
+serde_derive = "*"
+serde = "*"
+postgres = "0.13"
+
+[dependencies.rocket_contrib]
+version = "0.1.0"
+default-features = false
+features = ["handlebars_templates"]
+
+[dev-dependencies]
+rocket = { version = "0.1.1", features = ["testing"] }
