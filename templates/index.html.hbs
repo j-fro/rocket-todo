@@ -22,10 +22,16 @@
         {{#each this as |t|}}
             <li data-id="{{t.id}}"><span class="name">{{t.name}}</span>
                 {{#if t.complete}}
-                    <i class="complete fa fa-check-square-o" data-complete="true"></i>
+                    <button class="complete-button" data-complete="true">
+                        <i class="fa fa-check-square-o"></i>
+                    </button>
                 {{else}}
-                    <i class="complete fa fa-square-o" data-complete="false"></i>
-                {{/if}}</li>
+                <button class="complete-button" data-complete="false">
+                    <i class="fa fa-square-o"></i>
+                    </button>
+                {{/if}}
+                <button class="delete-button"><i class="fa fa-times"></i></button>
+            </li>
         {{/each}}
     </ul>
 </body>

@@ -1,10 +1,6 @@
 $(document).ready(function() {
     console.log('o');
-    $(document).on('click', '.complete', function() {
-        // var complete = false;
-        // if($(this).text() === 'Incomplete') {
-        //     complete = true;
-        // }
+    $(document).on('click', '.complete-button', function() {
         var task = JSON.stringify({
             id: $(this).parent().data('id'),
             name: $(this).parent().find('.name').text(),
@@ -13,15 +9,34 @@ $(document).ready(function() {
         $.ajax({
             url: '/',
             type: 'PUT',
-            dataType: 'json',
             contentType: 'application/json; charset=UTF-8',
             data: task,
             success: function(response) {
                 console.log('success');
+                window.location.replace("/");
             },
             error: function(err) {
                 console.log('err', err);
-                window.location.replace("/");
+            }
+        });
+    });
+    $(document).on('click', '.delete-button', function() {
+        var task = JSON.stringify({
+            id: $(this).parent().data('id'),
+            name: '',
+            complete: false
+        });
+        $.ajax({
+            url: '/',
+            type: 'DELETE',
+            contentType: 'application/json',
+            data: task,
+            success: function(response) {
+                console.log('success');
+                window.location.replace('/');
+            },
+            error: function(err) {
+                console.log('err');
             }
         });
     });

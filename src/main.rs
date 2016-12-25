@@ -9,7 +9,6 @@ extern crate postgres;
 extern crate serde_derive;
 
 use std::path::{Path, PathBuf};
-use std::default::Default;
 use rocket::request::Form;
 use rocket::response::{Redirect, NamedFile};
 use rocket_contrib::{Template, JSON};
@@ -40,6 +39,12 @@ fn new_task(task: Form<Task>) -> Redirect {
 #[put("/", format="application/json", data="<task>")]
 fn edit_task(task: JSON<Task>) -> Redirect {
     update_task(&task);
+    Redirect::to("/")
+}
+
+#[delete("/", format="application/json", data="<task>")]
+fn delete_task(task: JSON<Task>) -> Redirect {
+    delete_task_from_db(task.id);
     Redirect::to("/")
 }
 
@@ -74,8 +79,13 @@ fn update_task(task: &Task) -> () {
         &[&task.name, &task.complete, &task.id]).unwrap();
 }
 
+fn delete_task_from_db(id: i32) -> () {
+    let conn = Connection::connect(CONN_STRING, TlsMode::None).unwrap();
+    conn.execute("DELETE FROM tasks WHERE id=$1", &[&id]).unwrap();
+}
+
 fn main() {
     rocket::ignite()
-        .mount("/", routes![index, new_task, edit_task, files])
+        .mount("/", routes![index, new_task, edit_task, delete_task, files])
         .launch()
 }
