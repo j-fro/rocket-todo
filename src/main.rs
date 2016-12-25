@@ -1,5 +1,4 @@
-#![feature(plugin, custom_derive)]
-#![feature(proc_macro)]
+#![feature(plugin, custom_derive, proc_macro)]
 #![plugin(rocket_codegen)]
 
 extern crate rocket;
@@ -9,12 +8,14 @@ extern crate postgres;
 #[macro_use]
 extern crate serde_derive;
 
+use std::path::{Path, PathBuf};
+use std::default::Default;
 use rocket::request::Form;
-use rocket::response::Redirect;
+use rocket::response::{Redirect, NamedFile};
 use rocket_contrib::{Template, JSON};
 use postgres::{Connection, TlsMode};
 
-#[derive(Serialize, Deserialize, Debug, FromForm)]
+#[derive(Serialize, Deserialize, Debug, FromForm, Default)]
 struct Task {
     id: i32,
     name: String,
@@ -32,16 +33,20 @@ fn index() -> Template {
 #[post("/", data="<task>")]
 fn new_task(task: Form<Task>) -> Redirect {
     let task = task.get();
-    println!("{:?}", task);
     insert_task(task);
     Redirect::to("/")
 }
 
 #[put("/", format="application/json", data="<task>")]
 fn edit_task(task: JSON<Task>) -> Redirect {
-    println!("{:?}", task);
     update_task(&task);
     Redirect::to("/")
+}
+
+/// Static file handler
+#[get("/<file..>")]
+fn files(file: PathBuf) -> Option<NamedFile> {
+    NamedFile::open(Path::new("static/").join(file)).ok()
 }
 
 fn query_tasks() -> Vec<Task> {
@@ -71,6 +76,6 @@ fn update_task(task: &Task) -> () {
 
 fn main() {
     rocket::ignite()
-        .mount("/", routes![index, new_task, edit_task])
+        .mount("/", routes![index, new_task, edit_task, files])
         .launch()
 }

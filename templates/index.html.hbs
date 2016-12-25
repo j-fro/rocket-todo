@@ -4,23 +4,27 @@
 <head>
     <meta charset="utf-8">
     <title>Test</title>
+    <link rel="stylesheet" href="/css/font-awesome.min.css">
+    <script src="scripts/vendors/jquery.min.js" charset="utf-8"></script>
+    <script src="scripts/client.js" charset="utf-8"></script>
 </head>
 
 <body>
     <h1>Test</h1>
     <form class="" action="" method="post">
         <input type="text" name="name">
+        <input type="number" name="id" value="0">
         <input type="hidden" name="complete" value="off">
         <input type="checkbox" name="complete" value="on">
         <input type="submit" value="Submit">
     </form>
     <ul>
         {{#each this as |t|}}
-            <li data-id="{{t.id}}">{{t.name}}, 
+            <li data-id="{{t.id}}"><span class="name">{{t.name}}</span>
                 {{#if t.complete}}
-                    Complete
+                    <i class="complete fa fa-check-square-o" data-complete="true"></i>
                 {{else}}
-                    Incomplete
+                    <i class="complete fa fa-square-o" data-complete="false"></i>
                 {{/if}}</li>
         {{/each}}
     </ul>
