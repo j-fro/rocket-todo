@@ -16,7 +16,12 @@
     </form>
     <ul>
         {{#each this as |t|}}
-            <li>{{t.name}}, {{t.complete}}</li>
+            <li data-id="{{t.id}}">{{t.name}}, 
+                {{#if t.complete}}
+                    Complete
+                {{else}}
+                    Incomplete
+                {{/if}}</li>
         {{/each}}
     </ul>
 </body>
