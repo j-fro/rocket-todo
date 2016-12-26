@@ -1,0 +1,41 @@
+@import url('https://fonts.googleapis.com/css?family=Alegreya+Sans');
+body {
+    text-align: center;
+    font-family: 'Alegreya Sans', sans-serif;
+}
+
+button {
+    font-family: 'Alegreya Sans', sans-serif;
+    border: none;
+    background-color: rgba(0,0,0,0);
+    font-size: 16px;
+}
+
+button:hover {
+    cursor: pointer;
+}
+
+.delete-button:hover {
+    color: red;
+}
+
+.complete-button:hover {
+    color: blue;
+}
+
+#idIn {
+    visibility: hidden;
+    width: 0;
+    margin: 0;
+    padding: 0;
+}
+
+ul {
+    list-style: none;
+}
+
+.name {
+    display: inline-block;
+    width: 20%;
+    text-align: left;
+}
