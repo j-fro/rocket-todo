@@ -14,6 +14,7 @@ use rocket::response::{Redirect, NamedFile};
 use rocket_contrib::{Template, JSON};
 use postgres::{Connection, TlsMode};
 
+
 #[derive(Serialize, Deserialize, Debug, FromForm, Default)]
 struct Task {
     id: i32,
