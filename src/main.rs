@@ -8,7 +8,9 @@ extern crate postgres;
 #[macro_use]
 extern crate serde_derive;
 
+use std::error::Error;
 use std::path::{Path, PathBuf};
+use rocket::config::{Config, Environment, Value};
 use rocket::request::Form;
 use rocket::response::{Redirect, NamedFile};
 use rocket_contrib::{Template, JSON};
@@ -21,8 +23,6 @@ struct Task {
     name: String,
     complete: bool
 }
-
-const CONN_STRING: &'static str = "postgres://jacobfroman@localhost:5432/rust-todo";
 
 #[get("/")]
 fn index() -> Template {
@@ -67,7 +67,7 @@ fn files(file: PathBuf) -> Option<NamedFile> {
 }
 
 fn query_tasks() -> Vec<Task> {
-    let conn = Connection::connect(CONN_STRING, TlsMode::None).unwrap();
+    let conn = Connection::connect(conn_string(), TlsMode::None).unwrap();
     let mut tasks = Vec::new();
     for row in &conn.query("SELECT * FROM tasks ORDER BY complete", &[]).unwrap() {
         let task = Task {
@@ -81,23 +81,50 @@ fn query_tasks() -> Vec<Task> {
 }
 
 fn insert_task(task: &Task) -> Result<u64, postgres::error::Error> {
-    let conn = Connection::connect(CONN_STRING, TlsMode::None).unwrap();
+    let conn = Connection::connect(conn_string(), TlsMode::None).unwrap();
     conn.execute("INSERT INTO tasks (name, complete) VALUES ($1, $2)", &[&task.name, &task.complete])
 }
 
 fn update_task(task: &Task) -> Result<u64, postgres::error::Error> {
-    let conn = Connection::connect(CONN_STRING, TlsMode::None).unwrap();
+    let conn = Connection::connect(conn_string(), TlsMode::None).unwrap();
     conn.execute("UPDATE tasks SET name=$1, complete=$2 WHERE id=$3",
         &[&task.name, &task.complete, &task.id])
 }
 
-fn delete_task_from_db(id: i32) -> () {
-    let conn = Connection::connect(CONN_STRING, TlsMode::None).unwrap();
-    conn.execute("DELETE FROM tasks WHERE id=$1", &[&id]).unwrap();
+fn delete_task_from_db(id: i32) -> Result<u64, postgres::error::Error> {
+    let conn = Connection::connect(conn_string(), TlsMode::None).unwrap();
+    Ok(conn.execute("DELETE FROM tasks WHERE id=$1", &[&id])?)
 }
 
 fn main() {
-    rocket::ignite()
+    let config = Config::default_for(Environment::active().unwrap(), "/custom")
+        .unwrap()
+        .port(
+            match std::env::vars().find(|x| x.0 == "PORT") {
+                Some(x) => x.1,
+                None => String::from("5000"),
+            }.parse::<usize>().unwrap()
+        )
+        .extra("CONN_STRING", &Value::String(
+            match std::env::vars().find(|x| x.0 == "DATABASE_URL") {
+                Some(x) => x.1,
+                None => String::from("postgres://jacobfroman@localhost:5432/rust-todo")
+            }
+        ));
+
+    for extra in config.extras() {
+        println!("{:?}", extra);
+    }
+
+    rocket::custom(&config)
         .mount("/", routes![index, new_task, edit_task, delete_task, files])
         .launch()
+}
+
+fn conn_string() -> String {
+    let conn_string = match rocket::config::active() {
+        Some(config) => config.get_str("CONN_STRING").unwrap_or("postgres://jacobfroman@localhost:5432/rust-todo"),
+        None => "postgres://jacobfroman@localhost:5432/rust-todo"
+    };
+    String::from(conn_string)
 }
