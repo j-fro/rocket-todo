@@ -16,7 +16,6 @@ use rocket::response::{Redirect, NamedFile};
 use rocket_contrib::{Template, JSON};
 use postgres::{Connection, TlsMode};
 
-
 #[derive(Serialize, Deserialize, Debug, FromForm, Default)]
 struct Task {
     id: i32,
@@ -111,10 +110,6 @@ fn main() {
                 None => String::from("postgres://jacobfroman@localhost:5432/rust-todo")
             }
         ));
-
-    for extra in config.extras() {
-        println!("{:?}", extra);
-    }
 
     rocket::custom(&config)
         .mount("/", routes![index, new_task, edit_task, delete_task, files])
