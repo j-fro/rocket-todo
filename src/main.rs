@@ -1,4 +1,4 @@
-#![feature(plugin, custom_derive, proc_macro)]
+#![feature(plugin, custom_derive)]
 #![plugin(rocket_codegen)]
 
 extern crate rocket;
@@ -8,7 +8,6 @@ extern crate postgres;
 #[macro_use]
 extern crate serde_derive;
 
-use std::error::Error;
 use std::path::{Path, PathBuf};
 use rocket::config::{Config, Environment, Value};
 use rocket::request::Form;
@@ -54,9 +53,11 @@ fn edit_task(task: JSON<Task>) -> Result<String, String> {
 }
 
 #[delete("/", format="application/json", data="<task>")]
-fn delete_task(task: JSON<Task>) -> Redirect {
-    delete_task_from_db(task.id);
-    Redirect::to("/")
+fn delete_task(task: JSON<Task>) -> Option<Redirect> {
+    match delete_task_from_db(task.id) {
+        Ok(_) => Some(Redirect::to("/")),
+        Err(_) => None
+    }
 }
 
 /// Static file handler
